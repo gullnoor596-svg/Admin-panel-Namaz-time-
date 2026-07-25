@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ðŸ•Œ Namaz Time Admin</title>
+    <title>🕌 Namaz Time Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -340,13 +340,13 @@
 
 <div class="container">
     <div class="header">
-        <h1>ðŸ•Œ Namaz <span>Time</span></h1>
-        <div class="badge">âš¡ Admin Panel</div>
+        <h1>🕌 Namaz <span>Time</span></h1>
+        <div class="badge">⚡ Admin Panel</div>
         <p>Edit & Sync with Firebase</p>
     </div>
 
     <div class="status-bar loading" id="statusBar">
-        <span>â³</span> Loading timings...
+        <span>⏳</span> Loading timings...
     </div>
 
     <!-- ===== MAIN BOX (Monday) ===== -->
@@ -381,7 +381,7 @@
     <!-- ===== GOLD ANIMATED FRIDAY BOX ===== -->
     <div class="friday-box">
         <div class="box-title">
-            <i class="fas fa-star"></i> Friday <span>â­ Special Day</span>
+            <i class="fas fa-star"></i> Friday <span>⭐ Special Day</span>
         </div>
         <div class="friday-single">
             <label>Fajr</label>
@@ -395,17 +395,17 @@
             <button onclick="loadData()"><i class="fas fa-sync-alt"></i> Refresh</button>
             <button onclick="clearCache()"><i class="fas fa-trash"></i> Clear</button>
         </div>
-        <span class="badge" id="cacheBadge">ðŸ“¡ Firebase</span>
+        <span class="badge" id="cacheBadge">📡 Firebase</span>
     </div>
 
     <button class="btn-save" id="saveBtn" onclick="saveToFirebase()">
-        ðŸ’¾ Save to Firebase
+        💾 Save to Firebase
     </button>
 
     <div class="footer">
-        <span>ðŸ”„ Auto-sync every 30s</span>
-        <span style="margin-left: 12px;">â€¢</span>
-        <a onclick="loadData()">âŸ³ Refresh</a>
+        <span>🔄 Auto-sync every 30s</span>
+        <span style="margin-left: 12px;">•</span>
+        <a onclick="loadData()">⟳ Refresh</a>
     </div>
 </div>
 
@@ -433,15 +433,15 @@ const cacheBadge = document.getElementById('cacheBadge');
 // ========================================
 function setStatus(msg, type = 'loading') {
     statusBar.className = `status-bar ${type}`;
-    const icons = { loading: 'â³', success: 'âœ…', error: 'âŒ', warning: 'âš ï¸' };
-    statusBar.innerHTML = `<span>${icons[type] || 'â„¹ï¸'}</span> ${msg}`;
+    const icons = { loading: '⏳', success: '✅', error: '❌', warning: '⚠️' };
+    statusBar.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> ${msg}`;
 }
 
 function clearCache() {
     localStorage.removeItem('namaz_backup');
     localStorage.removeItem('namaz_last_update');
     sessionStorage.clear();
-    setStatus('ðŸ—‘ï¸ Cache cleared!', 'info');
+    setStatus('🗑️ Cache cleared!', 'info');
     setTimeout(loadData, 300);
 }
 
@@ -467,8 +467,8 @@ async function loadData() {
             if (hasValidData) {
                 currentData = data;
                 renderTimings(data);
-                setStatus('âœ… Loaded from Firebase!', 'success');
-                cacheBadge.textContent = 'ðŸ“¡ Firebase';
+                setStatus('✅ Loaded from Firebase!', 'success');
+                cacheBadge.textContent = '📡 Firebase';
                 saveBtn.disabled = false;
                 return;
             }
@@ -477,12 +477,12 @@ async function loadData() {
         // Use default data
         currentData = getDefaultData();
         renderTimings(currentData);
-        setStatus('âš ï¸ Using default data', 'warning');
-        cacheBadge.textContent = 'ðŸ“‚ Default';
+        setStatus('⚠️ Using default data', 'warning');
+        cacheBadge.textContent = '📂 Default';
         saveBtn.disabled = false;
 
     } catch (error) {
-        setStatus('âš ï¸ Error: ' + error.message, 'error');
+        setStatus('⚠️ Error: ' + error.message, 'error');
         const backup = localStorage.getItem('namaz_backup');
         if (backup) {
             try {
@@ -490,7 +490,7 @@ async function loadData() {
                 if (parsed && typeof parsed === 'object') {
                     currentData = parsed;
                     renderTimings(parsed);
-                    setStatus('ðŸ“‚ Using cached data', 'warning');
+                    setStatus('📂 Using cached data', 'warning');
                     saveBtn.disabled = false;
                     return;
                 }
@@ -498,7 +498,7 @@ async function loadData() {
         }
         currentData = getDefaultData();
         renderTimings(currentData);
-        setStatus('ðŸ“‚ Default data (offline)', 'warning');
+        setStatus('📂 Default data (offline)', 'warning');
         saveBtn.disabled = false;
     }
 }
@@ -596,11 +596,11 @@ async function saveToFirebase() {
     });
 
     if (!hasChanges) {
-        setStatus('âš ï¸ No changes detected', 'warning');
+        setStatus('⚠️ No changes detected', 'warning');
         return;
     }
 
-    setStatus('â³ Saving to Firebase...', 'loading');
+    setStatus('⏳ Saving to Firebase...', 'loading');
     saveBtn.disabled = true;
     isSaving = true;
 
@@ -616,9 +616,9 @@ async function saveToFirebase() {
         currentData = updated;
         localStorage.setItem('namaz_backup', JSON.stringify(updated));
 
-        setStatus('âœ… Saved to Firebase! ðŸŽ‰', 'success');
+        setStatus('✅ Saved to Firebase! 🎉', 'success');
         document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
-        cacheBadge.textContent = 'ðŸ“¡ Firebase';
+        cacheBadge.textContent = '📡 Firebase';
 
         // Notify other tabs
         try {
@@ -633,7 +633,7 @@ async function saveToFirebase() {
         setTimeout(() => loadData(), 800);
 
     } catch (error) {
-        setStatus('âŒ Error: ' + error.message, 'error');
+        setStatus('❌ Error: ' + error.message, 'error');
     } finally {
         saveBtn.disabled = false;
         isSaving = false;
@@ -651,7 +651,7 @@ function listenForUpdates() {
                 if (e.data?.type === 'update') {
                     const hasChanges = document.querySelectorAll('.changed').length > 0;
                     if (!hasChanges && !isSaving) {
-                        setStatus('ðŸ“¢ Update detected! Refreshing...', 'loading');
+                        setStatus('📢 Update detected! Refreshing...', 'loading');
                         setTimeout(loadData, 500);
                     }
                 }
@@ -664,7 +664,7 @@ function listenForUpdates() {
             localStorage.removeItem('namaz_update_flag');
             const hasChanges = document.querySelectorAll('.changed').length > 0;
             if (!hasChanges && !isSaving) {
-                setStatus('ðŸ“¢ Update detected!', 'loading');
+                setStatus('📢 Update detected!', 'loading');
                 setTimeout(loadData, 300);
             }
         }
@@ -709,10 +709,10 @@ listenForUpdates();
 loadData();
 startAutoRefresh();
 
-console.log('âš¡ Admin Panel - 1 Box + Jumma Box');
-console.log('ðŸ“Œ Data URL:', DB_URL);
-console.log('âŒ¨ï¸ Ctrl+S = Save | Ctrl+R = Refresh');
+console.log('⚡ Admin Panel - 1 Box + Jumma Box');
+console.log('📌 Data URL:', DB_URL);
+console.log('⌨️ Ctrl+S = Save | Ctrl+R = Refresh');
 </script>
 
 </body>
-    </html>
+</html>
