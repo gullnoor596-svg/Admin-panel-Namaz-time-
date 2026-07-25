@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🕌 Namaz Time Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #0a0a14;
+            min-height: 100vh;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 750px;
+            width: 100%;
+            margin: auto;
+            background: rgba(255,255,255,0.04);
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+        .header {
+            text-align: center;
+            padding: 6px 0 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 14px;
+        }
+        .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
+        .header h1 span { color: #64ffda; }
+        .header .badge-admin {
+            background: rgba(255,107,107,0.12);
+            color: #ff6b6b;
+            padding: 2px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 3px;
+            display: inline-block;
+            border: 1px solid rgba(255,107,107,0.15);
+        }
+        .header p { color: #8892b0; font-size: 12px; margin-top: 3px; }
+
+        .status-bar {
+            background: transparent !important;
+            padding: 6px 14px;
+            margin-bottom: 10px;
+            color: #ccd6f6;
+            font-size: 12px;
+            transition: all 0.2s;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .status-bar.loading { color: #fcc419; }
+        .status-bar.success { color: #69db7c; }
+        .status-bar.error { color: #ff6b6b; }
+        .status-bar.warning { color: #ff922b; }
+
+        .timings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .time-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+        .time-box:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(100,255,218,0.12);
+            transform: translateY(-1px);
+        }
+        .time-box label {
+            display: block;
+            color: #64ffda;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+        .time-box input {
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 6px 4px;
+            color: #ffffff !important;
+            font-size: 15px;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            transition: all 0.15s;
+            outline: none;
+            cursor: text;
+        }
+        .time-box input:hover { border-color: rgba(255,255,255,0.18); }
+        .time-box input:focus {
+            border-color: #64ffda;
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 12px rgba(100,255,218,0.04);
+        }
+        .time-box input.changed {
+            border-color: #fcc419;
+            background: rgba(252,196,25,0.06);
+        }
+        .time-box input::placeholder { color: #5a6a8a; font-size: 11px; }
+
+        .more-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: inherit;
+        }
+        .more-box:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(100,255,218,0.2);
+            transform: scale(1.02);
+        }
+        .more-box:active { transform: scale(0.95); }
+        .more-box .more-title { color: #64ffda; font-size: 13px; font-weight: 600; }
+        .more-box .more-sub { color: #495670; font-size: 9px; margin-top: 1px; }
+        .more-box .more-arrow { color: #495670; font-size: 11px; margin-top: 1px; display: inline-block; transition: transform 0.2s; }
+        .more-box:hover .more-arrow { transform: translateX(3px); color: #64ffda; }
+
+        /* ===== GOLD ANIMATED FRIDAY BOX ===== */
+        .friday-box {
+            background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.02));
+            border: 2px solid #ffd700;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: none;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            animation: goldGlow 2s ease-in-out infinite;
+        }
+        .friday-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                rgba(255,215,0,0.05),
+                transparent,
+                rgba(255,215,0,0.05),
+                transparent
+            );
+            animation: goldRotate 4s linear infinite;
+        }
+        .friday-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                transparent 30%,
+                rgba(255,215,0,0.04) 50%,
+                transparent 70%
+            );
+            animation: goldShine 3s ease-in-out infinite;
+        }
+        .friday-box .box-title,
+        .friday-box .friday-single {
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes goldGlow {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(255,215,0,0.15), inset 0 0 15px rgba(255,215,0,0.05);
+                border-color: #ffd700;
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255,215,0,0.25), inset 0 0 25px rgba(255,215,0,0.08);
+                border-color: #ffed4a;
+            }
+        }
+        @keyframes goldRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes goldShine {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .friday-box.show { 
+            display: block; 
+            animation: goldGlow 2s ease-in-out infinite, fadeSlide 0.3s ease;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .friday-box .box-title {
+            color: #ffd700;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(255,215,0,0.2);
+        }
+        .friday-box .box-title i {
+            color: #ffd700;
+            animation: goldPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes goldPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .friday-box .box-title span {
+            background: rgba(255,215,0,0.12);
+            padding: 1px 12px;
+            border-radius: 20px;
+            font-size: 8px;
+            color: #ffd700;
+            border: 1px solid rgba(255,215,0,0.15);
+        }
+        .friday-single {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .friday-single label {
+            color: #ffd700;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.1);
+        }
+        .friday-single input {
+            background: rgba(255,215,0,0.06);
+            border: 1.5px solid rgba(255,215,0,0.15);
+            border-radius: 8px;
+            padding: 6px 12px;
+            color: #ffffff !important;
+            font-size: 15px;
+            font-weight: 600;
+            width: 120px;
+            transition: all 0.15s;
+            text-align: center;
+            outline: none;
+            cursor: text;
+        }
+        .friday-single input:hover { 
+            border-color: rgba(255,215,0,0.3); 
+            background: rgba(255,215,0,0.08);
+        }
+        .friday-single input:focus {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.08);
+            box-shadow: 0 0 20px rgba(255,215,0,0.08);
+        }
+        .friday-single input.changed {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.1);
+            box-shadow: 0 0 25px rgba(255,215,0,0.1);
+        }
+        .friday-single input::placeholder { color: #6a7a8a; opacity: 1; }
+        .friday-single .friday-badge {
+            background: rgba(255,215,0,0.08);
+            color: #ffd700;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 8px;
+            border: 1px solid rgba(255,215,0,0.08);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .action-bar button {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            color: #8892b0;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+        .action-bar button:hover { background: rgba(255,255,255,0.06); color: #ccd6f6; border-color: rgba(255,255,255,0.08); }
+        .action-bar .badge {
+            background: rgba(105,219,124,0.06);
+            color: #69db7c;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+        .action-bar .badge.edited { background: rgba(252,196,25,0.06); color: #fcc419; }
+        .action-bar .badge.error { background: rgba(255,107,107,0.06); color: #ff6b6b; }
+
+        .btn-save {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #64ffda, #48c9b0);
+            border: none;
+            border-radius: 12px;
+            color: #0f0c29;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.15s;
+        }
+        .btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(100,255,218,0.12); }
+        .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .footer {
+            text-align: center;
+            margin-top: 12px;
+            color: #495670;
+            font-size: 9px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+        .footer a { color: #64ffda; text-decoration: none; cursor: pointer; }
+
+        .notify-bar {
+            background: rgba(105,219,124,0.06);
+            border: 1px solid rgba(105,219,124,0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            color: #69db7c;
+            font-size: 11px;
+            display: none;
+            text-align: center;
+        }
+        .notify-bar.show { display: block; animation: fadeSlide 0.3s ease; }
+
+        @media (max-width: 550px) {
+            .timings-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+            .container { padding: 14px; }
+            .time-box input { font-size: 13px; padding: 5px 3px; }
+            .friday-single input { width: 90px; font-size: 13px; }
+            .header h1 { font-size: 18px; }
+        }
+        @media (max-width: 380px) {
+            .timings-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
+            .time-box { padding: 8px 5px; }
+            .time-box input { font-size: 11px; padding: 4px 2px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🕌 Namaz <span>Time</span></h1>
+        <div class="badge-admin">⚡ Admin</div>
+        <p>Edit & Save • Auto-Notify Users</p>
+    </div>
+
+    <div class="status-bar loading" id="statusBar">
+        <span>⏳</span> Loading...
+    </div>
+
+    <div class="notify-bar" id="notifyBar">
+        ✅ Users will see updated timings!
+    </div>
+
+    <div class="action-bar">
+        <div>
+            <button onclick="loadData()">⟳</button>
+            <button onclick="clearCache()">✕</button>
+        </div>
+        <span class="badge" id="cacheBadge">● Live</span>
+    </div>
+
+    <!-- ===== GOLD ANIMATED FRIDAY BOX ===== -->
+    <div class="friday-box" id="fridayBox">
+        <div class="box-title">
+            <i class="fas fa-star"></i> Friday <span>⭐ Special</span>
+        </div>
+        <div class="friday-single">
+            <label>Fajr</label>
+            <input type="text" id="friday-fajr" placeholder="5:22 AM" />
+            <span class="friday-badge">Jumma</span>
+        </div>
+    </div>
+
+    <div class="timings-grid" id="timingsGrid">
+        <div class="time-box">
+            <label>Fajr</label>
+            <input type="text" id="fajr" placeholder="5:30 AM" />
+        </div>
+        <div class="time-box">
+            <label>Dhuhr</label>
+            <input type="text" id="dhuhr" placeholder="12:30 PM" />
+        </div>
+        <div class="time-box">
+            <label>Asr</label>
+            <input type="text" id="asr" placeholder="4:00 PM" />
+        </div>
+        <div class="time-box">
+            <label>Maghrib</label>
+            <input type="text" id="maghrib" placeholder="6:30 PM" />
+        </div>
+        <div class="time-box">
+            <label>Isha</label>
+            <input type="text" id="isha" placeholder="8:00 PM" />
+        </div>
+        <a href="https://github.com/gullnoor596-svg/Namaz-time-" target="_blank" class="more-box">
+            <div class="more-content">
+                <div class="more-title">More</div>
+                <div class="more-sub">GitHub</div>
+                <div class="more-arrow">↗</div>
+            </div>
+        </a>
+    </div>
+
+    <button class="btn-save" id="saveBtn" onclick="saveToGitHub()">
+        💾 Save & Notify Users
+    </button>
+
+    <div class="footer">
+        <a onclick="loadData()">⟳ Refresh</a> • 
+        <a onclick="clearCache()">✕ Clear</a>
+    </div>
+</div>
+
+<script>
+// ========================================
+// IMPROVED ADMIN PANEL - GOLD FRIDAY
+// ========================================
+
+// --- CONFIGURATION ---
+const REPO_OWNER = 'gullnoor596-svg';
+const REPO_NAME = 'Namaz-time-';
+const FILE_PATH = 'config.json';
+const BRANCH = 'main';
+
+// GitHub Pages URL (Fast & Reliable)
+const GITHUB_PAGES_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/${FILE_PATH}`;
+const RAW_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${FILE_PATH}`;
+const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+// --- PERMANENT TOKEN ---
+const PERMANENT_TOKEN = 'ghp_6ReAJvKuO24No1pNSXb6ucA4gocqsA3fN1xi';
+
+// Auto-set token
+if (!localStorage.getItem('github_token')) {
+    localStorage.setItem('github_token', PERMANENT_TOKEN);
+}
+let token = localStorage.getItem('github_token') || '';
+
+// --- DEFAULT DATA ---
+const DEFAULT_DATA = [
+    { "day": "Monday", "fajr": "5:30 AM", "dhuhr": "12:30 PM", "asr": "4:00 PM", "maghrib": "6:30 PM", "isha": "8:00 PM" },
+    { "day": "Tuesday", "fajr": "5:28 AM", "dhuhr": "12:32 PM", "asr": "4:02 PM", "maghrib": "6:32 PM", "isha": "8:02 PM" },
+    { "day": "Wednesday", "fajr": "5:26 AM", "dhuhr": "12:34 PM", "asr": "4:04 PM", "maghrib": "6:34 PM", "isha": "8:04 PM" },
+    { "day": "Thursday", "fajr": "5:24 AM", "dhuhr": "12:36 PM", "asr": "4:06 PM", "maghrib": "6:36 PM", "isha": "8:06 PM" },
+    { "day": "Friday", "fajr": "5:22 AM", "dhuhr": "12:38 PM", "asr": "4:08 PM", "maghrib": "6:38 PM", "isha": "8:08 PM" },
+    { "day": "Saturday", "fajr": "5:20 AM", "dhuhr": "12:40 PM", "asr": "4:10 PM", "maghrib": "6:40 PM", "isha": "8:10 PM" },
+    { "day": "Sunday", "fajr": "5:18 AM", "dhuhr": "12:42 PM", "asr": "4:12 PM", "maghrib": "6:42 PM", "isha": "8:12 PM" }
+];
+
+// --- STATE ---
+let currentData = [];
+let isSaving = false;
+let loadCounter = 0;
+let autoRefreshTimer = null;
+let updateVersion = parseInt(localStorage.getItem('namaz_version')) || 0;
+
+// --- DOM REFS ---
+const statusBar = document.getElementById('statusBar');
+const saveBtn = document.getElementById('saveBtn');
+const cacheBadge = document.getElementById('cacheBadge');
+const fridayBox = document.getElementById('fridayBox');
+const notifyBar = document.getElementById('notifyBar');
+const timeIds = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+// ========================================
+// UI FUNCTIONS
+// ========================================
+function setStatus(msg, type = 'loading') {
+    statusBar.className = `status-bar ${type}`;
+    const icons = { loading: '⏳', success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+    statusBar.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> ${msg}`;
+}
+
+function showNotify(msg) {
+    notifyBar.textContent = msg;
+    notifyBar.classList.add('show');
+    setTimeout(() => notifyBar.classList.remove('show'), 3000);
+}
+
+function clearCache() {
+    if ('caches' in window) caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+    localStorage.removeItem('namaz_backup');
+    localStorage.removeItem('namaz_version');
+    sessionStorage.clear();
+    setStatus('Cache cleared', 'info');
+    setTimeout(loadData, 100);
+}
+
+// ========================================
+// SMART LOAD DATA - LocalStorage First
+// ========================================
+async function loadData() {
+    loadCounter++;
+    
+    setStatus('Loading...', 'loading');
+    saveBtn.disabled = true;
+    cacheBadge.textContent = '◉';
+
+    try {
+        // --- STEP 1: Show cached data immediately ---
+        const cached = localStorage.getItem('namaz_backup');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    currentData = parsed;
+                    renderAll(parsed);
+                    setStatus('📂 Cached data', 'warning');
+                    cacheBadge.textContent = '📂 Cached';
+                    saveBtn.disabled = false;
+                }
+            } catch (e) {}
+        }
+
+        // --- STEP 2: Background sync from GitHub ---
+        try {
+            let data = null;
+            const url = GITHUB_PAGES_URL + '?t=' + Date.now() + '_' + loadCounter;
+            
+            const response = await fetch(url, {
+                cache: 'no-cache',
+                headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
+            });
+            
+            if (response.ok) {
+                data = await response.json();
+            } else {
+                const rawResponse = await fetch(RAW_URL + '?t=' + Date.now() + '_' + loadCounter, {
+                    cache: 'no-cache',
+                    headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
+                });
+                if (rawResponse.ok) {
+                    data = await rawResponse.json();
+                }
+            }
+
+            if (data && Array.isArray(data) && data.length > 0) {
+                currentData = data;
+                localStorage.setItem('namaz_backup', JSON.stringify(data));
+                updateVersion++;
+                localStorage.setItem('namaz_version', updateVersion.toString());
+                
+                renderAll(data);
+                setStatus('✅ ' + data.length + ' days loaded', 'success');
+                cacheBadge.textContent = '● Live';
+                saveBtn.disabled = false;
+                
+                localStorage.setItem('namaz_last_update', Date.now().toString());
+                notifyUsers();
+            }
+        } catch (bgError) {
+            if (currentData.length === 0) {
+                currentData = DEFAULT_DATA;
+                localStorage.setItem('namaz_backup', JSON.stringify(DEFAULT_DATA));
+                renderAll(DEFAULT_DATA);
+                setStatus('📂 Default data', 'warning');
+                cacheBadge.textContent = '● Default';
+                saveBtn.disabled = false;
+            }
+        }
+
+    } catch (error) {
+        setStatus('⚠️ ' + error.message, 'error');
+        cacheBadge.textContent = '◉ Error';
+        cacheBadge.className = 'badge error';
+        saveBtn.disabled = true;
+        
+        if (currentData.length === 0) {
+            currentData = DEFAULT_DATA;
+            localStorage.setItem('namaz_backup', JSON.stringify(DEFAULT_DATA));
+            renderAll(DEFAULT_DATA);
+            setStatus('📂 Default data', 'warning');
+            saveBtn.disabled = false;
+            cacheBadge.textContent = '● Default';
+            cacheBadge.className = 'badge';
+        }
+    }
+}
+
+// ========================================
+// RENDER
+// ========================================
+function renderAll(data) {
+    const monday = data[0] || {};
+    timeIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { 
+            el.value = monday[id] || '';
+            el.classList.remove('changed');
+        }
+    });
+    const friday = data.find(d => d.day === 'Friday');
+    if (friday) {
+        document.getElementById('friday-fajr').value = friday.fajr || '';
+        fridayBox.classList.add('show');
+    } else {
+        fridayBox.classList.remove('show');
+    }
+}
+
+// Input listeners
+timeIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', function() {
+            this.classList.add('changed');
+            cacheBadge.textContent = '✎';
+            cacheBadge.className = 'badge edited';
+        });
+        el.addEventListener('focus', function() { this.select(); });
+    }
+});
+
+document.getElementById('friday-fajr')?.addEventListener('input', function() {
+    this.classList.add('changed');
+    cacheBadge.textContent = '✎';
+    cacheBadge.className = 'badge edited';
+});
+document.getElementById('friday-fajr')?.addEventListener('focus', function() { this.select(); });
+
+function getUpdatedData() {
+    const timings = {};
+    timeIds.forEach(id => { timings[id] = document.getElementById(id)?.value || ''; });
+    const fridayFajr = document.getElementById('friday-fajr')?.value || '';
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return days.map(day => ({
+        day: day,
+        fajr: day === 'Friday' ? fridayFajr : timings.fajr || '',
+        dhuhr: timings.dhuhr || '',
+        asr: timings.asr || '',
+        maghrib: timings.maghrib || '',
+        isha: timings.isha || ''
+    }));
+}
+
+// ========================================
+// NOTIFY USERS
+// ========================================
+function notifyUsers() {
+    try {
+        if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel('namaz_updates');
+            channel.postMessage({
+                type: 'update',
+                version: updateVersion,
+                timestamp: Date.now(),
+                data: currentData
+            });
+            channel.close();
+        }
+    } catch (e) {}
+    localStorage.setItem('namaz_update_flag', 'true');
+    localStorage.setItem('namaz_update_data', JSON.stringify(currentData));
+}
+
+// ========================================
+// SAVE - SMART CACHE + NOTIFY
+// ========================================
+async function saveToGitHub() {
+    if (isSaving) return;
+    if (!token) { setStatus('⚠️ Token missing', 'error'); return; }
+
+    const updated = getUpdatedData();
+    
+    let changed = false;
+    if (currentData.length) {
+        updated.forEach((d, i) => {
+            if (i < currentData.length) {
+                if (d.fajr !== currentData[i]?.fajr || d.dhuhr !== currentData[i]?.dhuhr ||
+                    d.asr !== currentData[i]?.asr || d.maghrib !== currentData[i]?.maghrib ||
+                    d.isha !== currentData[i]?.isha) changed = true;
+            }
+        });
+    } else changed = true;
+    
+    if (!changed) { setStatus('⚠️ No changes', 'warning'); return; }
+    if (updated.length !== 7) { setStatus('❌ Error', 'error'); return; }
+
+    currentData = updated;
+    localStorage.setItem('namaz_backup', JSON.stringify(updated));
+    updateVersion++;
+    localStorage.setItem('namaz_version', updateVersion.toString());
+    renderAll(updated);
+    
+    setStatus('⏳ Saving...', 'loading');
+    saveBtn.disabled = true;
+    isSaving = true;
+
+    try {
+        const jsonString = JSON.stringify(updated, null, 2);
+        const content = btoa(unescape(encodeURIComponent(jsonString)));
+
+        const fileRes = await fetch(API_URL, {
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (!fileRes.ok) {
+            if (fileRes.status === 401) throw new Error('Invalid token');
+            if (fileRes.status === 404) throw new Error('File not found');
+            throw new Error('HTTP ' + fileRes.status);
+        }
+        
+        const fileData = await fileRes.json();
+        const sha = fileData.sha;
+
+        const res = await fetch(API_URL, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify({
+                message: '🕌 Update timings v' + updateVersion,
+                content: content,
+                sha: sha,
+                branch: BRANCH
+            })
+        });
+
+        if (res.ok) {
+            setStatus('✅ Saved! Users notified! 🎉', 'success');
+            saveBtn.disabled = false;
+            isSaving = false;
+            
+            document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
+            cacheBadge.textContent = '● Live';
+            cacheBadge.className = 'badge';
+            
+            localStorage.setItem('namaz_last_update', Date.now().toString());
+            notifyUsers();
+            showNotify('✅ Users notified! Auto-update on refresh');
+            
+            if ('caches' in window) {
+                caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+            }
+            
+        } else {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Save failed');
+        }
+    } catch (error) {
+        setStatus('❌ ' + error.message, 'error');
+        saveBtn.disabled = false;
+        isSaving = false;
+    }
+}
+
+// ========================================
+// LISTEN FOR USER UPDATES
+// ========================================
+function listenForUpdates() {
+    try {
+        if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel('namaz_updates');
+            channel.onmessage = function(event) {
+                if (event.data && event.data.type === 'update') {
+                    setStatus('📢 Update available! Refreshing...', 'info');
+                    setTimeout(loadData, 300);
+                }
+            };
+        }
+    } catch (e) {}
+}
+
+// ========================================
+// AUTO REFRESH
+// ========================================
+function startAutoRefresh() {
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(() => {
+        const hasChanges = document.querySelectorAll('.changed').length > 0;
+        if (!hasChanges && !isSaving) {
+            loadData();
+        }
+    }, 30000);
+}
+
+// ========================================
+// KEYBOARD SHORTCUTS
+// ========================================
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToGitHub(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); loadData(); }
+});
+
+// ========================================
+// INIT
+// ========================================
+listenForUpdates();
+loadData();
+startAutoRefresh();
+
+console.log('⚡ Improved Admin Panel - Gold Friday');
+console.log('📂 LocalStorage First | Background Sync');
+console.log('🔄 Auto-refresh every 30s');
+console.log('⌨️ Ctrl+S = Save | Ctrl+R = Refresh');
+</script>
+
+</body>
+              </html>
