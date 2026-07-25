@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🕌 Namaz Time Admin</title>
+    <title>ðŸ•Œ Namaz Time Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: #0a0a14;
+            background: #0f0f1a;
             min-height: 100vh;
-            padding: 12px;
+            padding: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -18,137 +19,119 @@
         .container {
             max-width: 750px;
             width: 100%;
-            margin: auto;
             background: rgba(255,255,255,0.04);
-            border-radius: 20px;
-            padding: 18px;
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 22px;
             border: 1px solid rgba(255,255,255,0.06);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
         .header {
             text-align: center;
-            padding: 6px 0 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 18px;
         }
-        .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
-        .header h1 span { color: #64ffda; }
-        .header .badge-admin {
-            background: rgba(255,107,107,0.12);
-            color: #ff6b6b;
-            padding: 2px 14px;
+        .header h1 { color: #fff; font-size: 26px; font-weight: 700; }
+        .header h1 span { color: #00e5ff; }
+        .header .badge {
+            background: rgba(0,229,255,0.12);
+            color: #00e5ff;
+            padding: 4px 16px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
-            margin-top: 3px;
+            margin-top: 4px;
             display: inline-block;
-            border: 1px solid rgba(255,107,107,0.15);
+            border: 1px solid rgba(0,229,255,0.15);
         }
-        .header p { color: #8892b0; font-size: 12px; margin-top: 3px; }
+        .header p { color: #8892b0; font-size: 13px; margin-top: 4px; }
 
         .status-bar {
             background: transparent !important;
-            padding: 6px 14px;
-            margin-bottom: 10px;
-            color: #ccd6f6;
-            font-size: 12px;
-            transition: all 0.2s;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        .status-bar.loading { color: #fcc419; }
-        .status-bar.success { color: #69db7c; }
-        .status-bar.error { color: #ff6b6b; }
-        .status-bar.warning { color: #ff922b; }
-        .status-bar.info { color: #64ffda; }
-
-        .timings-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            padding: 8px 14px;
             margin-bottom: 12px;
+            color: #ccd6f6;
+            font-size: 13px;
+            border-left: 3px solid #fcc419;
         }
-        .time-box {
-            background: rgba(255,255,255,0.04);
+        .status-bar.success { border-left-color: #69db7c; color: #69db7c; }
+        .status-bar.error { border-left-color: #ff6b6b; color: #ff6b6b; }
+        .status-bar.loading { border-left-color: #fcc419; color: #fcc419; }
+
+        /* ===== MAIN BOX ===== */
+        .main-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
             border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 10px 8px;
-            text-align: center;
-            transition: all 0.15s ease;
         }
-        .time-box:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: rgba(100,255,218,0.12);
-            transform: translateY(-1px);
-        }
-        .time-box label {
-            display: block;
+        .main-box .box-title {
             color: #64ffda;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .main-box .box-title i { color: #64ffda; }
+        .main-box .box-title span {
+            background: rgba(100,255,218,0.08);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            color: #64ffda;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        .time-item {
+            text-align: center;
+        }
+        .time-item label {
+            display: block;
+            color: #8892b0;
             font-size: 9px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
-        .time-box input {
+        .time-item input {
             background: rgba(255,255,255,0.06);
             border: 1.5px solid rgba(255,255,255,0.08);
             border-radius: 8px;
-            padding: 6px 4px;
+            padding: 8px 4px;
             color: #ffffff !important;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             width: 100%;
             text-align: center;
-            transition: all 0.15s;
+            transition: 0.2s;
             outline: none;
-            cursor: text;
         }
-        .time-box input:hover { border-color: rgba(255,255,255,0.18); }
-        .time-box input:focus {
-            border-color: #64ffda;
-            background: rgba(255,255,255,0.08);
-            box-shadow: 0 0 12px rgba(100,255,218,0.04);
+        .time-item input:focus {
+            border-color: #00e5ff;
+            background: rgba(255,255,255,0.1);
         }
-        .time-box input.changed {
+        .time-item input.changed {
             border-color: #fcc419;
-            background: rgba(252,196,25,0.06);
+            background: rgba(252,196,25,0.08);
         }
-        .time-box input::placeholder { color: #5a6a8a; font-size: 11px; }
+        .time-item input::placeholder { color: #5a6a8a; font-size: 11px; }
 
-        .more-box {
-            background: rgba(255,255,255,0.04);
-            border: 1px dashed rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 10px 8px;
-            text-align: center;
-            transition: all 0.15s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: inherit;
-        }
-        .more-box:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: rgba(100,255,218,0.2);
-            transform: scale(1.02);
-        }
-        .more-box:active { transform: scale(0.95); }
-        .more-box .more-title { color: #64ffda; font-size: 13px; font-weight: 600; }
-        .more-box .more-sub { color: #495670; font-size: 9px; margin-top: 1px; }
-        .more-box .more-arrow { color: #495670; font-size: 11px; margin-top: 1px; display: inline-block; transition: transform 0.2s; }
-        .more-box:hover .more-arrow { transform: translateX(3px); color: #64ffda; }
-
+        /* ===== GOLD ANIMATED FRIDAY BOX ===== */
         .friday-box {
             background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.02));
             border: 2px solid #ffd700;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            display: none;
-            transition: all 0.3s;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
             position: relative;
             overflow: hidden;
             animation: goldGlow 2s ease-in-out infinite;
@@ -210,23 +193,14 @@
             50% { transform: translateX(100%); }
         }
 
-        .friday-box.show { 
-            display: block; 
-            animation: goldGlow 2s ease-in-out infinite, fadeSlide 0.3s ease;
-        }
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .friday-box .box-title {
             color: #ffd700;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             text-shadow: 0 0 20px rgba(255,215,0,0.2);
         }
         .friday-box .box-title i {
@@ -239,21 +213,22 @@
         }
         .friday-box .box-title span {
             background: rgba(255,215,0,0.12);
-            padding: 1px 12px;
+            padding: 2px 14px;
             border-radius: 20px;
-            font-size: 8px;
+            font-size: 10px;
             color: #ffd700;
             border: 1px solid rgba(255,215,0,0.15);
         }
+
         .friday-single {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
         }
         .friday-single label {
             color: #ffd700;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -261,20 +236,19 @@
         }
         .friday-single input {
             background: rgba(255,215,0,0.06);
-            border: 1.5px solid rgba(255,215,0,0.15);
+            border: 1.5px solid rgba(255,215,0,0.2);
             border-radius: 8px;
-            padding: 6px 12px;
+            padding: 8px 16px;
             color: #ffffff !important;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            width: 120px;
+            width: 140px;
             transition: all 0.15s;
             text-align: center;
             outline: none;
-            cursor: text;
         }
         .friday-single input:hover { 
-            border-color: rgba(255,215,0,0.3); 
+            border-color: rgba(255,215,0,0.4); 
             background: rgba(255,215,0,0.08);
         }
         .friday-single input:focus {
@@ -291,9 +265,9 @@
         .friday-single .friday-badge {
             background: rgba(255,215,0,0.08);
             color: #ffd700;
-            padding: 2px 12px;
+            padding: 3px 14px;
             border-radius: 20px;
-            font-size: 8px;
+            font-size: 10px;
             border: 1px solid rgba(255,215,0,0.08);
         }
 
@@ -301,83 +275,64 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin: 16px 0 12px 0;
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 8px;
         }
         .action-bar button {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
             color: #8892b0;
-            padding: 5px 12px;
+            padding: 8px 16px;
             cursor: pointer;
-            font-size: 10px;
-            transition: all 0.15s;
+            font-size: 12px;
+            transition: 0.2s;
             font-weight: 500;
         }
-        .action-bar button:hover { background: rgba(255,255,255,0.06); color: #ccd6f6; border-color: rgba(255,255,255,0.08); }
+        .action-bar button:hover { background: rgba(255,255,255,0.08); color: #ccd6f6; }
         .action-bar .badge {
-            background: rgba(105,219,124,0.06);
+            background: rgba(105,219,124,0.08);
             color: #69db7c;
-            padding: 2px 10px;
+            padding: 4px 14px;
             border-radius: 20px;
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 500;
         }
-        .action-bar .badge.edited { background: rgba(252,196,25,0.06); color: #fcc419; }
-        .action-bar .badge.error { background: rgba(255,107,107,0.06); color: #ff6b6b; }
 
         .btn-save {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #64ffda, #48c9b0);
+            padding: 14px;
+            background: linear-gradient(135deg, #00e5ff, #00b8cc);
             border: none;
-            border-radius: 12px;
-            color: #0f0c29;
-            font-size: 15px;
+            border-radius: 14px;
+            color: #0f0f1a;
+            font-size: 17px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 8px;
-            transition: all 0.15s;
+            margin-top: 6px;
+            transition: 0.2s;
         }
-        .btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(100,255,218,0.12); }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,229,255,0.15); }
         .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         .footer {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 14px;
             color: #495670;
-            font-size: 9px;
-            padding-top: 10px;
+            font-size: 11px;
+            padding-top: 12px;
             border-top: 1px solid rgba(255,255,255,0.04);
         }
-        .footer a { color: #64ffda; text-decoration: none; cursor: pointer; }
+        .footer a { color: #00e5ff; text-decoration: none; cursor: pointer; }
 
-        .notify-bar {
-            background: rgba(105,219,124,0.06);
-            border: 1px solid rgba(105,219,124,0.1);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            color: #69db7c;
-            font-size: 11px;
-            display: none;
-            text-align: center;
-        }
-        .notify-bar.show { display: block; animation: fadeSlide 0.3s ease; }
-
-        @media (max-width: 550px) {
-            .timings-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-            .container { padding: 14px; }
-            .time-box input { font-size: 13px; padding: 5px 3px; }
-            .friday-single input { width: 90px; font-size: 13px; }
-            .header h1 { font-size: 18px; }
+        @media (max-width: 500px) {
+            .time-grid { grid-template-columns: repeat(3, 1fr); }
+            .friday-single input { width: 110px; font-size: 14px; }
         }
         @media (max-width: 380px) {
-            .timings-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
-            .time-box { padding: 8px 5px; }
-            .time-box input { font-size: 11px; padding: 4px 2px; }
+            .time-grid { grid-template-columns: repeat(2, 1fr); }
+            .friday-single input { width: 90px; font-size: 13px; }
         }
     </style>
 </head>
@@ -385,30 +340,48 @@
 
 <div class="container">
     <div class="header">
-        <h1>🕌 Namaz <span>Time</span></h1>
-        <div class="badge-admin">⚡ Admin</div>
-        <p>Edit & Save • Auto-Notify Users</p>
+        <h1>ðŸ•Œ Namaz <span>Time</span></h1>
+        <div class="badge">âš¡ Admin Panel</div>
+        <p>Edit & Sync with Firebase</p>
     </div>
 
     <div class="status-bar loading" id="statusBar">
-        <span>⏳</span> Loading...
+        <span>â³</span> Loading timings...
     </div>
 
-    <div class="notify-bar" id="notifyBar">
-        ✅ Users will see updated timings!
-    </div>
-
-    <div class="action-bar">
-        <div>
-            <button onclick="loadData()">⟳</button>
-            <button onclick="clearCache()">✕</button>
-        </div>
-        <span class="badge" id="cacheBadge">● Live</span>
-    </div>
-
-    <div class="friday-box" id="fridayBox">
+    <!-- ===== MAIN BOX (Monday) ===== -->
+    <div class="main-box">
         <div class="box-title">
-            <i class="fas fa-star"></i> Friday <span>⭐ Special</span>
+            <i class="fas fa-calendar-day"></i> Monday <span>Default</span>
+        </div>
+        <div class="time-grid">
+            <div class="time-item">
+                <label>Fajr</label>
+                <input type="text" id="fajr" placeholder="5:30 AM" />
+            </div>
+            <div class="time-item">
+                <label>Dhuhr</label>
+                <input type="text" id="dhuhr" placeholder="12:30 PM" />
+            </div>
+            <div class="time-item">
+                <label>Asr</label>
+                <input type="text" id="asr" placeholder="4:00 PM" />
+            </div>
+            <div class="time-item">
+                <label>Maghrib</label>
+                <input type="text" id="maghrib" placeholder="6:30 PM" />
+            </div>
+            <div class="time-item">
+                <label>Isha</label>
+                <input type="text" id="isha" placeholder="8:00 PM" />
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== GOLD ANIMATED FRIDAY BOX ===== -->
+    <div class="friday-box">
+        <div class="box-title">
+            <i class="fas fa-star"></i> Friday <span>â­ Special Day</span>
         </div>
         <div class="friday-single">
             <label>Fajr</label>
@@ -417,433 +390,268 @@
         </div>
     </div>
 
-    <div class="timings-grid" id="timingsGrid">
-        <div class="time-box">
-            <label>Fajr</label>
-            <input type="text" id="fajr" placeholder="5:30 AM" />
+    <div class="action-bar">
+        <div>
+            <button onclick="loadData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button onclick="clearCache()"><i class="fas fa-trash"></i> Clear</button>
         </div>
-        <div class="time-box">
-            <label>Dhuhr</label>
-            <input type="text" id="dhuhr" placeholder="12:30 PM" />
-        </div>
-        <div class="time-box">
-            <label>Asr</label>
-            <input type="text" id="asr" placeholder="4:00 PM" />
-        </div>
-        <div class="time-box">
-            <label>Maghrib</label>
-            <input type="text" id="maghrib" placeholder="6:30 PM" />
-        </div>
-        <div class="time-box">
-            <label>Isha</label>
-            <input type="text" id="isha" placeholder="8:00 PM" />
-        </div>
-        <a href="https://github.com/gullnoor596-svg/Namaz-time-" target="_blank" class="more-box">
-            <div class="more-content">
-                <div class="more-title">More</div>
-                <div class="more-sub">GitHub</div>
-                <div class="more-arrow">↗</div>
-            </div>
-        </a>
+        <span class="badge" id="cacheBadge">ðŸ“¡ Firebase</span>
     </div>
 
-    <button class="btn-save" id="saveBtn" onclick="saveToGitHub()">
-        💾 Save & Notify Users
+    <button class="btn-save" id="saveBtn" onclick="saveToFirebase()">
+        ðŸ’¾ Save to Firebase
     </button>
 
     <div class="footer">
-        <a onclick="loadData()">⟳ Refresh</a> • 
-        <a onclick="clearCache()">✕ Clear</a>
+        <span>ðŸ”„ Auto-sync every 30s</span>
+        <span style="margin-left: 12px;">â€¢</span>
+        <a onclick="loadData()">âŸ³ Refresh</a>
     </div>
 </div>
 
 <script>
 // ========================================
-// FIXED - NO SELF-REFRESH LOOP
+// ADMIN PANEL - 1 BOX + Jumma BOX
 // ========================================
 
-// --- CONFIGURATION ---
-const REPO_OWNER = 'gullnoor596-svg';
-const REPO_NAME = 'Namaz-time-';
-const FILE_PATH = 'config.json';
-const BRANCH = 'main';
+// --- CONFIG ---
+const DB_URL = 'https://namaztimedata-default-rtdb.firebaseio.com/namaz.json';
 
-const GITHUB_PAGES_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/${FILE_PATH}`;
-const RAW_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${FILE_PATH}`;
-const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-
-// --- PERMANENT TOKEN ---
-const PERMANENT_TOKEN = 'ghp_6ReAJvKuO24No1pNSXb6ucA4gocqsA3fN1xi';
-
-if (!localStorage.getItem('github_token')) {
-    localStorage.setItem('github_token', PERMANENT_TOKEN);
-}
-let token = localStorage.getItem('github_token') || '';
-
-// --- DEFAULT DATA ---
-const DEFAULT_DATA = [
-    { "day": "Monday", "fajr": "5:30 AM", "dhuhr": "12:30 PM", "asr": "4:00 PM", "maghrib": "6:30 PM", "isha": "8:00 PM" },
-    { "day": "Tuesday", "fajr": "5:28 AM", "dhuhr": "12:32 PM", "asr": "4:02 PM", "maghrib": "6:32 PM", "isha": "8:02 PM" },
-    { "day": "Wednesday", "fajr": "5:26 AM", "dhuhr": "12:34 PM", "asr": "4:04 PM", "maghrib": "6:34 PM", "isha": "8:04 PM" },
-    { "day": "Thursday", "fajr": "5:24 AM", "dhuhr": "12:36 PM", "asr": "4:06 PM", "maghrib": "6:36 PM", "isha": "8:06 PM" },
-    { "day": "Friday", "fajr": "5:22 AM", "dhuhr": "12:38 PM", "asr": "4:08 PM", "maghrib": "6:38 PM", "isha": "8:08 PM" },
-    { "day": "Saturday", "fajr": "5:20 AM", "dhuhr": "12:40 PM", "asr": "4:10 PM", "maghrib": "6:40 PM", "isha": "8:10 PM" },
-    { "day": "Sunday", "fajr": "5:18 AM", "dhuhr": "12:42 PM", "asr": "4:12 PM", "maghrib": "6:42 PM", "isha": "8:12 PM" }
-];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const TIME_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 // --- STATE ---
-let currentData = [];
+let currentData = {};
 let isSaving = false;
-let loadCounter = 0;
-let autoRefreshTimer = null;
-let updateVersion = parseInt(localStorage.getItem('namaz_version')) || 0;
-let isOwnUpdate = false; // Flag to ignore own broadcast
 
-// --- DOM REFS ---
 const statusBar = document.getElementById('statusBar');
 const saveBtn = document.getElementById('saveBtn');
 const cacheBadge = document.getElementById('cacheBadge');
-const fridayBox = document.getElementById('fridayBox');
-const notifyBar = document.getElementById('notifyBar');
-const timeIds = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 // ========================================
 // UI FUNCTIONS
 // ========================================
 function setStatus(msg, type = 'loading') {
     statusBar.className = `status-bar ${type}`;
-    const icons = { loading: '⏳', success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-    statusBar.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> ${msg}`;
-}
-
-function showNotify(msg) {
-    notifyBar.textContent = msg;
-    notifyBar.classList.add('show');
-    setTimeout(() => notifyBar.classList.remove('show'), 3000);
+    const icons = { loading: 'â³', success: 'âœ…', error: 'âŒ', warning: 'âš ï¸' };
+    statusBar.innerHTML = `<span>${icons[type] || 'â„¹ï¸'}</span> ${msg}`;
 }
 
 function clearCache() {
-    if ('caches' in window) caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
     localStorage.removeItem('namaz_backup');
-    localStorage.removeItem('namaz_version');
     localStorage.removeItem('namaz_last_update');
-    localStorage.removeItem('namaz_update_flag');
     sessionStorage.clear();
-    setStatus('Cache cleared', 'info');
-    setTimeout(loadData, 100);
+    setStatus('ðŸ—‘ï¸ Cache cleared!', 'info');
+    setTimeout(loadData, 300);
 }
 
 // ========================================
-// SMART LOAD DATA
+// LOAD DATA FROM FIREBASE
 // ========================================
 async function loadData() {
-    loadCounter++;
-    
-    setStatus('Loading...', 'loading');
+    setStatus('Loading from Firebase...', 'loading');
     saveBtn.disabled = true;
-    cacheBadge.textContent = '◉';
 
     try {
-        // --- STEP 1: Show cached data immediately ---
-        const cached = localStorage.getItem('namaz_backup');
-        let hasCached = false;
-        if (cached) {
+        const response = await fetch(DB_URL, {
+            cache: 'no-cache',
+            headers: { 'Cache-Control': 'no-cache, no-store' }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+            const hasValidData = DAYS.some(day => data[day] && typeof data[day] === 'object');
+            if (hasValidData) {
+                currentData = data;
+                renderTimings(data);
+                setStatus('âœ… Loaded from Firebase!', 'success');
+                cacheBadge.textContent = 'ðŸ“¡ Firebase';
+                saveBtn.disabled = false;
+                return;
+            }
+        }
+
+        // Use default data
+        currentData = getDefaultData();
+        renderTimings(currentData);
+        setStatus('âš ï¸ Using default data', 'warning');
+        cacheBadge.textContent = 'ðŸ“‚ Default';
+        saveBtn.disabled = false;
+
+    } catch (error) {
+        setStatus('âš ï¸ Error: ' + error.message, 'error');
+        const backup = localStorage.getItem('namaz_backup');
+        if (backup) {
             try {
-                const parsed = JSON.parse(cached);
-                if (Array.isArray(parsed) && parsed.length > 0) {
+                const parsed = JSON.parse(backup);
+                if (parsed && typeof parsed === 'object') {
                     currentData = parsed;
-                    renderAll(parsed);
-                    hasCached = true;
-                    setStatus('📂 Cached data', 'warning');
-                    cacheBadge.textContent = '📂 Cached';
+                    renderTimings(parsed);
+                    setStatus('ðŸ“‚ Using cached data', 'warning');
                     saveBtn.disabled = false;
+                    return;
                 }
             } catch (e) {}
         }
-
-        // --- STEP 2: Background sync from GitHub ---
-        try {
-            let data = null;
-            const url = GITHUB_PAGES_URL + '?t=' + Date.now() + '_' + loadCounter;
-            
-            const response = await fetch(url, {
-                cache: 'no-cache',
-                headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
-            });
-            
-            if (response.ok) {
-                data = await response.json();
-            } else {
-                const rawResponse = await fetch(RAW_URL + '?t=' + Date.now() + '_' + loadCounter, {
-                    cache: 'no-cache',
-                    headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
-                });
-                if (rawResponse.ok) {
-                    data = await rawResponse.json();
-                }
-            }
-
-            if (data && Array.isArray(data) && data.length > 0) {
-                const currentStr = JSON.stringify(currentData);
-                const newStr = JSON.stringify(data);
-                
-                if (currentStr !== newStr || !hasCached) {
-                    currentData = data;
-                    localStorage.setItem('namaz_backup', JSON.stringify(data));
-                    updateVersion++;
-                    localStorage.setItem('namaz_version', updateVersion.toString());
-                    
-                    renderAll(data);
-                    setStatus('✅ ' + data.length + ' days loaded', 'success');
-                    cacheBadge.textContent = '● Live';
-                    saveBtn.disabled = false;
-                    
-                    localStorage.setItem('namaz_last_update', Date.now().toString());
-                } else {
-                    if (!hasCached) {
-                        currentData = data;
-                        renderAll(data);
-                    }
-                    setStatus('✅ ' + data.length + ' days (up to date)', 'success');
-                    cacheBadge.textContent = '● Live';
-                    saveBtn.disabled = false;
-                }
-            }
-        } catch (bgError) {
-            if (currentData.length === 0) {
-                currentData = DEFAULT_DATA;
-                localStorage.setItem('namaz_backup', JSON.stringify(DEFAULT_DATA));
-                renderAll(DEFAULT_DATA);
-                setStatus('📂 Default data', 'warning');
-                cacheBadge.textContent = '● Default';
-                saveBtn.disabled = false;
-            } else {
-                setStatus('📂 Using cached data', 'info');
-                saveBtn.disabled = false;
-            }
-        }
-
-    } catch (error) {
-        setStatus('⚠️ ' + error.message, 'error');
-        cacheBadge.textContent = '◉ Error';
-        cacheBadge.className = 'badge error';
-        saveBtn.disabled = true;
-        
-        if (currentData.length === 0) {
-            currentData = DEFAULT_DATA;
-            localStorage.setItem('namaz_backup', JSON.stringify(DEFAULT_DATA));
-            renderAll(DEFAULT_DATA);
-            setStatus('📂 Default data', 'warning');
-            saveBtn.disabled = false;
-            cacheBadge.textContent = '● Default';
-            cacheBadge.className = 'badge';
-        }
+        currentData = getDefaultData();
+        renderTimings(currentData);
+        setStatus('ðŸ“‚ Default data (offline)', 'warning');
+        saveBtn.disabled = false;
     }
 }
 
 // ========================================
-// RENDER
+// GET DEFAULT DATA
 // ========================================
-function renderAll(data) {
-    const monday = data[0] || {};
-    timeIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { 
-            el.value = monday[id] || '';
-            el.classList.remove('changed');
+function getDefaultData() {
+    return {
+        "Monday": { "fajr": "5:30 AM", "dhuhr": "12:30 PM", "asr": "4:00 PM", "maghrib": "6:30 PM", "isha": "8:00 PM" },
+        "Tuesday": { "fajr": "5:28 AM", "dhuhr": "12:32 PM", "asr": "4:02 PM", "maghrib": "6:32 PM", "isha": "8:02 PM" },
+        "Wednesday": { "fajr": "5:26 AM", "dhuhr": "12:34 PM", "asr": "4:04 PM", "maghrib": "6:34 PM", "isha": "8:04 PM" },
+        "Thursday": { "fajr": "5:24 AM", "dhuhr": "12:36 PM", "asr": "4:06 PM", "maghrib": "6:36 PM", "isha": "8:06 PM" },
+        "Friday": { "fajr": "5:22 AM", "dhuhr": "12:38 PM", "asr": "4:08 PM", "maghrib": "6:38 PM", "isha": "8:08 PM" },
+        "Saturday": { "fajr": "5:20 AM", "dhuhr": "12:40 PM", "asr": "4:10 PM", "maghrib": "6:40 PM", "isha": "8:10 PM" },
+        "Sunday": { "fajr": "5:18 AM", "dhuhr": "12:42 PM", "asr": "4:12 PM", "maghrib": "6:42 PM", "isha": "8:12 PM" }
+    };
+}
+
+// ========================================
+// RENDER TIMINGS
+// ========================================
+function renderTimings(data) {
+    const monday = data['Monday'] || {};
+    document.getElementById('fajr').value = monday.fajr || '';
+    document.getElementById('dhuhr').value = monday.dhuhr || '';
+    document.getElementById('asr').value = monday.asr || '';
+    document.getElementById('maghrib').value = monday.maghrib || '';
+    document.getElementById('isha').value = monday.isha || '';
+
+    const friday = data['Friday'] || {};
+    document.getElementById('friday-fajr').value = friday.fajr || '';
+
+    document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
+}
+
+// ========================================
+// GET UPDATED DATA
+// ========================================
+function getUpdatedData() {
+    const updated = {};
+    
+    // Get Monday timings from main box
+    const mainTimings = {
+        fajr: document.getElementById('fajr').value || '',
+        dhuhr: document.getElementById('dhuhr').value || '',
+        asr: document.getElementById('asr').value || '',
+        maghrib: document.getElementById('maghrib').value || '',
+        isha: document.getElementById('isha').value || ''
+    };
+    
+    // Get Friday Fajr from special box
+    const fridayFajr = document.getElementById('friday-fajr').value || '';
+    
+    // Apply to all days
+    DAYS.forEach(day => {
+        if (day === 'Friday') {
+            updated[day] = {
+                fajr: fridayFajr || mainTimings.fajr,
+                dhuhr: mainTimings.dhuhr,
+                asr: mainTimings.asr,
+                maghrib: mainTimings.maghrib,
+                isha: mainTimings.isha
+            };
+        } else {
+            updated[day] = {
+                fajr: mainTimings.fajr,
+                dhuhr: mainTimings.dhuhr,
+                asr: mainTimings.asr,
+                maghrib: mainTimings.maghrib,
+                isha: mainTimings.isha
+            };
         }
     });
-    const friday = data.find(d => d.day === 'Friday');
-    if (friday) {
-        document.getElementById('friday-fajr').value = friday.fajr || '';
-        fridayBox.classList.add('show');
-    } else {
-        fridayBox.classList.remove('show');
-    }
-}
-
-// Input listeners
-timeIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('input', function() {
-            this.classList.add('changed');
-            cacheBadge.textContent = '✎';
-            cacheBadge.className = 'badge edited';
-        });
-        el.addEventListener('focus', function() { this.select(); });
-    }
-});
-
-document.getElementById('friday-fajr')?.addEventListener('input', function() {
-    this.classList.add('changed');
-    cacheBadge.textContent = '✎';
-    cacheBadge.className = 'badge edited';
-});
-document.getElementById('friday-fajr')?.addEventListener('focus', function() { this.select(); });
-
-function getUpdatedData() {
-    const timings = {};
-    timeIds.forEach(id => { timings[id] = document.getElementById(id)?.value || ''; });
-    const fridayFajr = document.getElementById('friday-fajr')?.value || '';
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return days.map(day => ({
-        day: day,
-        fajr: day === 'Friday' ? fridayFajr : timings.fajr || '',
-        dhuhr: timings.dhuhr || '',
-        asr: timings.asr || '',
-        maghrib: timings.maghrib || '',
-        isha: timings.isha || ''
-    }));
-}
-
-// ========================================
-// NOTIFY USERS - FIXED: Admin ignores own broadcast
-// ========================================
-function notifyUsers() {
-    try {
-        if (typeof BroadcastChannel !== 'undefined') {
-            // Set flag BEFORE sending so this tab ignores its own message
-            isOwnUpdate = true;
-            
-            const channel = new BroadcastChannel('namaz_updates');
-            channel.postMessage({
-                type: 'update',
-                version: updateVersion,
-                timestamp: Date.now(),
-                data: currentData,
-                sender: 'admin'
-            });
-            channel.close();
-            
-            // Reset flag after a short delay
-            setTimeout(() => {
-                isOwnUpdate = false;
-            }, 1000);
-        }
-    } catch (e) {}
     
-    // Store in localStorage for cross-tab communication
-    localStorage.setItem('namaz_update_flag', 'true');
-    localStorage.setItem('namaz_update_data', JSON.stringify(currentData));
-    localStorage.setItem('namaz_last_update', Date.now().toString());
+    return updated;
 }
 
 // ========================================
-// SAVE - FIXED: No self-refresh
+// SAVE TO FIREBASE
 // ========================================
-async function saveToGitHub() {
+async function saveToFirebase() {
     if (isSaving) return;
-    if (!token) { setStatus('⚠️ Token missing', 'error'); return; }
 
     const updated = getUpdatedData();
-    
-    let changed = false;
-    if (currentData.length) {
-        updated.forEach((d, i) => {
-            if (i < currentData.length) {
-                if (d.fajr !== currentData[i]?.fajr || d.dhuhr !== currentData[i]?.dhuhr ||
-                    d.asr !== currentData[i]?.asr || d.maghrib !== currentData[i]?.maghrib ||
-                    d.isha !== currentData[i]?.isha) changed = true;
+
+    // Check if anything changed
+    let hasChanges = false;
+    DAYS.forEach(day => {
+        TIME_IDS.forEach(id => {
+            if (updated[day][id] !== currentData[day]?.[id]) {
+                hasChanges = true;
             }
         });
-    } else changed = true;
-    
-    if (!changed) { setStatus('⚠️ No changes', 'warning'); return; }
-    if (updated.length !== 7) { setStatus('❌ Error', 'error'); return; }
+    });
 
-    currentData = updated;
-    localStorage.setItem('namaz_backup', JSON.stringify(updated));
-    updateVersion++;
-    localStorage.setItem('namaz_version', updateVersion.toString());
-    renderAll(updated);
-    
-    setStatus('⏳ Saving...', 'loading');
+    if (!hasChanges) {
+        setStatus('âš ï¸ No changes detected', 'warning');
+        return;
+    }
+
+    setStatus('â³ Saving to Firebase...', 'loading');
     saveBtn.disabled = true;
     isSaving = true;
 
     try {
-        const jsonString = JSON.stringify(updated, null, 2);
-        const content = btoa(unescape(encodeURIComponent(jsonString)));
-
-        const fileRes = await fetch(API_URL, {
-            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        if (!fileRes.ok) {
-            if (fileRes.status === 401) throw new Error('Invalid token');
-            if (fileRes.status === 404) throw new Error('File not found');
-            throw new Error('HTTP ' + fileRes.status);
-        }
-        
-        const fileData = await fileRes.json();
-        const sha = fileData.sha;
-
-        const res = await fetch(API_URL, {
+        const response = await fetch(DB_URL, {
             method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-                message: '🕌 Update timings v' + updateVersion,
-                content: content,
-                sha: sha,
-                branch: BRANCH
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated)
         });
 
-        if (res.ok) {
-            setStatus('✅ Saved! Users notified! 🎉', 'success');
-            saveBtn.disabled = false;
-            isSaving = false;
-            
-            document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
-            cacheBadge.textContent = '● Live';
-            cacheBadge.className = 'badge';
-            
-            // Notify users (other tabs) - this tab will ignore it
-            notifyUsers();
-            showNotify('✅ Saved! Other users will auto-update');
-            
-            if ('caches' in window) {
-                caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        currentData = updated;
+        localStorage.setItem('namaz_backup', JSON.stringify(updated));
+
+        setStatus('âœ… Saved to Firebase! ðŸŽ‰', 'success');
+        document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
+        cacheBadge.textContent = 'ðŸ“¡ Firebase';
+
+        // Notify other tabs
+        try {
+            if (typeof BroadcastChannel !== 'undefined') {
+                const channel = new BroadcastChannel('namaz_updates');
+                channel.postMessage({ type: 'update', data: updated });
+                channel.close();
             }
-            
-            // Reload only this tab's data after save (no broadcast trigger)
-            setTimeout(() => {
-                loadData();
-            }, 500);
-            
-        } else {
-            const errorData = await res.json();
-            throw new Error(errorData.message || 'Save failed');
-        }
+        } catch (e) {}
+        localStorage.setItem('namaz_update_flag', 'true');
+
+        setTimeout(() => loadData(), 800);
+
     } catch (error) {
-        setStatus('❌ ' + error.message, 'error');
+        setStatus('âŒ Error: ' + error.message, 'error');
+    } finally {
         saveBtn.disabled = false;
         isSaving = false;
     }
 }
 
 // ========================================
-// LISTEN FOR UPDATES - FIXED: Ignore own broadcast
+// LISTEN FOR UPDATES
 // ========================================
 function listenForUpdates() {
     try {
         if (typeof BroadcastChannel !== 'undefined') {
             const channel = new BroadcastChannel('namaz_updates');
-            channel.onmessage = function(event) {
-                // IGNORE if this tab sent the message
-                if (isOwnUpdate) {
-                    console.log('⏭️ Ignoring own broadcast');
-                    return;
-                }
-                
-                if (event.data && event.data.type === 'update') {
+            channel.onmessage = function(e) {
+                if (e.data?.type === 'update') {
                     const hasChanges = document.querySelectorAll('.changed').length > 0;
                     if (!hasChanges && !isSaving) {
-                        setStatus('📢 Update from admin! Refreshing...', 'info');
+                        setStatus('ðŸ“¢ Update detected! Refreshing...', 'loading');
                         setTimeout(loadData, 500);
                     }
                 }
@@ -851,21 +659,12 @@ function listenForUpdates() {
         }
     } catch (e) {}
 
-    // Listen for localStorage changes
     window.addEventListener('storage', function(e) {
-        // Ignore if this tab set the flag
         if (e.key === 'namaz_update_flag' && e.newValue === 'true') {
-            // Check if we set it ourselves (via isOwnUpdate)
-            if (isOwnUpdate) {
-                console.log('⏭️ Ignoring own localStorage update');
-                return;
-            }
-            
-            // Clear the flag to prevent loops
             localStorage.removeItem('namaz_update_flag');
             const hasChanges = document.querySelectorAll('.changed').length > 0;
             if (!hasChanges && !isSaving) {
-                setStatus('📢 Update detected!', 'info');
+                setStatus('ðŸ“¢ Update detected!', 'loading');
                 setTimeout(loadData, 300);
             }
         }
@@ -873,8 +672,10 @@ function listenForUpdates() {
 }
 
 // ========================================
-// AUTO REFRESH - Reduced frequency
+// AUTO REFRESH
 // ========================================
+let autoRefreshTimer = null;
+
 function startAutoRefresh() {
     if (autoRefreshTimer) clearInterval(autoRefreshTimer);
     autoRefreshTimer = setInterval(() => {
@@ -882,28 +683,36 @@ function startAutoRefresh() {
         if (!hasChanges && !isSaving) {
             loadData();
         }
-    }, 60000); // Every 60 seconds
+    }, 30000);
 }
 
 // ========================================
 // KEYBOARD SHORTCUTS
 // ========================================
 document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToGitHub(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToFirebase(); }
     if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); loadData(); }
 });
 
 // ========================================
 // INIT
 // ========================================
+// Add change listeners
+document.querySelectorAll('.time-item input, .friday-single input').forEach(input => {
+    input.addEventListener('input', function() {
+        this.classList.add('changed');
+    });
+    input.addEventListener('focus', function() { this.select(); });
+});
+
 listenForUpdates();
 loadData();
 startAutoRefresh();
 
-console.log('⚡ Admin Panel - No Self-Refresh Loop');
-console.log('📌 Save: Other tabs refresh, this tab stays');
-console.log('⌨️ Ctrl+S = Save | Ctrl+R = Refresh');
+console.log('âš¡ Admin Panel - 1 Box + Jumma Box');
+console.log('ðŸ“Œ Data URL:', DB_URL);
+console.log('âŒ¨ï¸ Ctrl+S = Save | Ctrl+R = Refresh');
 </script>
 
 </body>
-</html>
+    </html>
