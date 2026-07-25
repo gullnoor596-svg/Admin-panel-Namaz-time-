@@ -60,6 +60,7 @@
         .status-bar.success { color: #69db7c; }
         .status-bar.error { color: #ff6b6b; }
         .status-bar.warning { color: #ff922b; }
+        .status-bar.info { color: #64ffda; }
 
         .timings-grid {
             display: grid;
@@ -140,7 +141,6 @@
         .more-box .more-arrow { color: #495670; font-size: 11px; margin-top: 1px; display: inline-block; transition: transform 0.2s; }
         .more-box:hover .more-arrow { transform: translateX(3px); color: #64ffda; }
 
-        /* ===== GOLD ANIMATED FRIDAY BOX ===== */
         .friday-box {
             background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.02));
             border: 2px solid #ffd700;
@@ -406,7 +406,6 @@
         <span class="badge" id="cacheBadge">● Live</span>
     </div>
 
-    <!-- ===== GOLD ANIMATED FRIDAY BOX ===== -->
     <div class="friday-box" id="fridayBox">
         <div class="box-title">
             <i class="fas fa-star"></i> Friday <span>⭐ Special</span>
@@ -460,7 +459,7 @@
 
 <script>
 // ========================================
-// IMPROVED ADMIN PANEL - GOLD FRIDAY
+// FIXED - NO SELF-REFRESH LOOP
 // ========================================
 
 // --- CONFIGURATION ---
@@ -469,7 +468,6 @@ const REPO_NAME = 'Namaz-time-';
 const FILE_PATH = 'config.json';
 const BRANCH = 'main';
 
-// GitHub Pages URL (Fast & Reliable)
 const GITHUB_PAGES_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/${FILE_PATH}`;
 const RAW_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${FILE_PATH}`;
 const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -477,7 +475,6 @@ const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/content
 // --- PERMANENT TOKEN ---
 const PERMANENT_TOKEN = 'ghp_6ReAJvKuO24No1pNSXb6ucA4gocqsA3fN1xi';
 
-// Auto-set token
 if (!localStorage.getItem('github_token')) {
     localStorage.setItem('github_token', PERMANENT_TOKEN);
 }
@@ -500,6 +497,7 @@ let isSaving = false;
 let loadCounter = 0;
 let autoRefreshTimer = null;
 let updateVersion = parseInt(localStorage.getItem('namaz_version')) || 0;
+let isOwnUpdate = false; // Flag to ignore own broadcast
 
 // --- DOM REFS ---
 const statusBar = document.getElementById('statusBar');
@@ -528,13 +526,15 @@ function clearCache() {
     if ('caches' in window) caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
     localStorage.removeItem('namaz_backup');
     localStorage.removeItem('namaz_version');
+    localStorage.removeItem('namaz_last_update');
+    localStorage.removeItem('namaz_update_flag');
     sessionStorage.clear();
     setStatus('Cache cleared', 'info');
     setTimeout(loadData, 100);
 }
 
 // ========================================
-// SMART LOAD DATA - LocalStorage First
+// SMART LOAD DATA
 // ========================================
 async function loadData() {
     loadCounter++;
@@ -546,12 +546,14 @@ async function loadData() {
     try {
         // --- STEP 1: Show cached data immediately ---
         const cached = localStorage.getItem('namaz_backup');
+        let hasCached = false;
         if (cached) {
             try {
                 const parsed = JSON.parse(cached);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     currentData = parsed;
                     renderAll(parsed);
+                    hasCached = true;
                     setStatus('📂 Cached data', 'warning');
                     cacheBadge.textContent = '📂 Cached';
                     saveBtn.disabled = false;
@@ -582,18 +584,30 @@ async function loadData() {
             }
 
             if (data && Array.isArray(data) && data.length > 0) {
-                currentData = data;
-                localStorage.setItem('namaz_backup', JSON.stringify(data));
-                updateVersion++;
-                localStorage.setItem('namaz_version', updateVersion.toString());
+                const currentStr = JSON.stringify(currentData);
+                const newStr = JSON.stringify(data);
                 
-                renderAll(data);
-                setStatus('✅ ' + data.length + ' days loaded', 'success');
-                cacheBadge.textContent = '● Live';
-                saveBtn.disabled = false;
-                
-                localStorage.setItem('namaz_last_update', Date.now().toString());
-                notifyUsers();
+                if (currentStr !== newStr || !hasCached) {
+                    currentData = data;
+                    localStorage.setItem('namaz_backup', JSON.stringify(data));
+                    updateVersion++;
+                    localStorage.setItem('namaz_version', updateVersion.toString());
+                    
+                    renderAll(data);
+                    setStatus('✅ ' + data.length + ' days loaded', 'success');
+                    cacheBadge.textContent = '● Live';
+                    saveBtn.disabled = false;
+                    
+                    localStorage.setItem('namaz_last_update', Date.now().toString());
+                } else {
+                    if (!hasCached) {
+                        currentData = data;
+                        renderAll(data);
+                    }
+                    setStatus('✅ ' + data.length + ' days (up to date)', 'success');
+                    cacheBadge.textContent = '● Live';
+                    saveBtn.disabled = false;
+                }
             }
         } catch (bgError) {
             if (currentData.length === 0) {
@@ -602,6 +616,9 @@ async function loadData() {
                 renderAll(DEFAULT_DATA);
                 setStatus('📂 Default data', 'warning');
                 cacheBadge.textContent = '● Default';
+                saveBtn.disabled = false;
+            } else {
+                setStatus('📂 Using cached data', 'info');
                 saveBtn.disabled = false;
             }
         }
@@ -681,27 +698,39 @@ function getUpdatedData() {
 }
 
 // ========================================
-// NOTIFY USERS
+// NOTIFY USERS - FIXED: Admin ignores own broadcast
 // ========================================
 function notifyUsers() {
     try {
         if (typeof BroadcastChannel !== 'undefined') {
+            // Set flag BEFORE sending so this tab ignores its own message
+            isOwnUpdate = true;
+            
             const channel = new BroadcastChannel('namaz_updates');
             channel.postMessage({
                 type: 'update',
                 version: updateVersion,
                 timestamp: Date.now(),
-                data: currentData
+                data: currentData,
+                sender: 'admin'
             });
             channel.close();
+            
+            // Reset flag after a short delay
+            setTimeout(() => {
+                isOwnUpdate = false;
+            }, 1000);
         }
     } catch (e) {}
+    
+    // Store in localStorage for cross-tab communication
     localStorage.setItem('namaz_update_flag', 'true');
     localStorage.setItem('namaz_update_data', JSON.stringify(currentData));
+    localStorage.setItem('namaz_last_update', Date.now().toString());
 }
 
 // ========================================
-// SAVE - SMART CACHE + NOTIFY
+// SAVE - FIXED: No self-refresh
 // ========================================
 async function saveToGitHub() {
     if (isSaving) return;
@@ -773,13 +802,18 @@ async function saveToGitHub() {
             cacheBadge.textContent = '● Live';
             cacheBadge.className = 'badge';
             
-            localStorage.setItem('namaz_last_update', Date.now().toString());
+            // Notify users (other tabs) - this tab will ignore it
             notifyUsers();
-            showNotify('✅ Users notified! Auto-update on refresh');
+            showNotify('✅ Saved! Other users will auto-update');
             
             if ('caches' in window) {
                 caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
             }
+            
+            // Reload only this tab's data after save (no broadcast trigger)
+            setTimeout(() => {
+                loadData();
+            }, 500);
             
         } else {
             const errorData = await res.json();
@@ -793,24 +827,53 @@ async function saveToGitHub() {
 }
 
 // ========================================
-// LISTEN FOR USER UPDATES
+// LISTEN FOR UPDATES - FIXED: Ignore own broadcast
 // ========================================
 function listenForUpdates() {
     try {
         if (typeof BroadcastChannel !== 'undefined') {
             const channel = new BroadcastChannel('namaz_updates');
             channel.onmessage = function(event) {
+                // IGNORE if this tab sent the message
+                if (isOwnUpdate) {
+                    console.log('⏭️ Ignoring own broadcast');
+                    return;
+                }
+                
                 if (event.data && event.data.type === 'update') {
-                    setStatus('📢 Update available! Refreshing...', 'info');
-                    setTimeout(loadData, 300);
+                    const hasChanges = document.querySelectorAll('.changed').length > 0;
+                    if (!hasChanges && !isSaving) {
+                        setStatus('📢 Update from admin! Refreshing...', 'info');
+                        setTimeout(loadData, 500);
+                    }
                 }
             };
         }
     } catch (e) {}
+
+    // Listen for localStorage changes
+    window.addEventListener('storage', function(e) {
+        // Ignore if this tab set the flag
+        if (e.key === 'namaz_update_flag' && e.newValue === 'true') {
+            // Check if we set it ourselves (via isOwnUpdate)
+            if (isOwnUpdate) {
+                console.log('⏭️ Ignoring own localStorage update');
+                return;
+            }
+            
+            // Clear the flag to prevent loops
+            localStorage.removeItem('namaz_update_flag');
+            const hasChanges = document.querySelectorAll('.changed').length > 0;
+            if (!hasChanges && !isSaving) {
+                setStatus('📢 Update detected!', 'info');
+                setTimeout(loadData, 300);
+            }
+        }
+    });
 }
 
 // ========================================
-// AUTO REFRESH
+// AUTO REFRESH - Reduced frequency
 // ========================================
 function startAutoRefresh() {
     if (autoRefreshTimer) clearInterval(autoRefreshTimer);
@@ -819,7 +882,7 @@ function startAutoRefresh() {
         if (!hasChanges && !isSaving) {
             loadData();
         }
-    }, 30000);
+    }, 60000); // Every 60 seconds
 }
 
 // ========================================
@@ -837,11 +900,10 @@ listenForUpdates();
 loadData();
 startAutoRefresh();
 
-console.log('⚡ Improved Admin Panel - Gold Friday');
-console.log('📂 LocalStorage First | Background Sync');
-console.log('🔄 Auto-refresh every 30s');
+console.log('⚡ Admin Panel - No Self-Refresh Loop');
+console.log('📌 Save: Other tabs refresh, this tab stays');
 console.log('⌨️ Ctrl+S = Save | Ctrl+R = Refresh');
 </script>
 
 </body>
-              </html>
+</html>
